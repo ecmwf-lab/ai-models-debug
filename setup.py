@@ -50,6 +50,7 @@ setuptools.setup(
     keywords="tool",
     entry_points={
         "ai_models.model": [
+            "debug = ai_models_debug.simple:Debug",
             "debug_simple = ai_models_debug.simple:Debug",
             "debug_lagged = ai_models_debug.lagged:Debug",
         ]

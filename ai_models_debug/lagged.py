@@ -69,10 +69,10 @@ class Debug(Model):
             for i in range(self.lead_time // 6):
                 step = (i + 1) * 6
 
-                for a, fs in zip(fields_sfc_numpy, fields_sfc):
+                for a, fs in zip(fields_pl_numpy, fields_pl):
                     self.write(a, template=fs, step=step)
 
-                for a, fs in zip(fields_pl_numpy, fields_pl):
+                for a, fs in zip(fields_sfc_numpy, fields_sfc):
                     self.write(a, template=fs, step=step)
 
                 stepper(i, step)
