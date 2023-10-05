@@ -7,10 +7,8 @@
 
 
 import logging
-import os
 
 import numpy as np
-import onnxruntime as ort
 from ai_models.model import Model
 
 LOG = logging.getLogger(__name__)
@@ -56,11 +54,14 @@ class Debug(Model):
         # input = fields_pl_numpy
         # input_surface = fields_sfc_numpy
 
-
-
         with self.stepper(6) as stepper:
             for i in range(self.lead_time // 6):
                 step = (i + 1) * 6
 
+                for a, fs in zip(fields_sfc_numpy, fields_sfc):
+                    self.write(a, template=fs, step=step)
+
+                for a, fs in zip(fields_pl_numpy, fields_pl):
+                    self.write(a, template=fs, step=step)
 
                 stepper(i, step)

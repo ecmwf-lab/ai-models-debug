@@ -26,7 +26,7 @@ class Debug(Model):
     grid = [0.25, 0.25]
     param_sfc = ["msl", "2t"]
     param_level_pl = (
-        ["u", "v", 't'],
+        ["u", "v", "t"],
         [1000, 700, 500, 100],
     )
 
@@ -42,7 +42,9 @@ class Debug(Model):
 
         param, level = self.param_level_pl
         fields_pl = fields_pl.sel(param=param, level=level)
-        fields_pl = fields_pl.order_by(valid_datetime='ascending', param=param, level=level)
+        fields_pl = fields_pl.order_by(
+            valid_datetime="ascending", param=param, level=level
+        )
 
         fields_pl_numpy = fields_pl.to_numpy(dtype=np.float32)
         # 2 time steps, 3 parameters, 4 levels, 721 lat, 1440 lon
@@ -50,7 +52,9 @@ class Debug(Model):
 
         fields_sfc = self.fields_sfc
         fields_sfc = fields_sfc.sel(param=self.param_sfc)
-        fields_sfc = fields_sfc.order_by(valid_datetime='ascending',param=self.param_sfc)
+        fields_sfc = fields_sfc.order_by(
+            valid_datetime="ascending", param=self.param_sfc
+        )
 
         fields_sfc_numpy = fields_sfc.to_numpy(dtype=np.float32)
         assert fields_sfc_numpy.shape == (2 * 2, 721, 1440), fields_sfc_numpy.shape
@@ -58,8 +62,17 @@ class Debug(Model):
         # input = fields_pl_numpy
         # input_surface = fields_sfc_numpy
 
+        fields_pl_numpy = fields_pl_numpy.reshape((2, 3 * 4, 721, 1440))[-1]
+        fields_sfc_numpy = fields_sfc_numpy.reshape((2, 2, 721, 1440))[-1]
 
         with self.stepper(6) as stepper:
             for i in range(self.lead_time // 6):
                 step = (i + 1) * 6
+
+                for a, fs in zip(fields_sfc_numpy, fields_sfc):
+                    self.write(a, template=fs, step=step)
+
+                for a, fs in zip(fields_pl_numpy, fields_pl):
+                    self.write(a, template=fs, step=step)
+
                 stepper(i, step)
